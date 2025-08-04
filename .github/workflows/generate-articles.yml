@@ -1,0 +1,382 @@
+name: Generate Programming Articles
+
+on:
+  schedule:
+    # Ejecutar todos los días a las 10:00 AM UTC - 3 artículos por día
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+    inputs:
+      count:
+        description: 'Number of articles to generate'
+        required: false
+        default: '3'
+      topics:
+        description: 'Specific topics (comma separated)'
+        required: false
+        default: ''
+
+jobs:
+  generate-articles:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        npm install axios fs-extra handlebars slug cheerio
+        
+    - name: Generate articles with Gemini
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ARTICLE_COUNT: ${{ github.event.inputs.count || '3' }}
+        SPECIFIC_TOPICS: ${{ github.event.inputs.topics || '' }}
+      run: |
+        cat > generate-articles.js << 'EOF'
+        const axios = require('axios');
+        const fs = require('fs-extra');
+        const Handlebars = require('handlebars');
+        const slug = require('slug');
+        const cheerio = require('cheerio');
+        
+        // Temas de programación para artículos (expandido para más variedad)
+        const programmingTopics = [
+          'JavaScript ES6+ features y nuevas funcionalidades',
+          'React Hooks mejores prácticas y patrones avanzados',
+          'Node.js optimización de performance y escalabilidad',
+          'TypeScript tipos avanzados y utility types',
+          'CSS Grid layout técnicas modernas',
+          'REST API diseño y mejores prácticas',
+          'Base de datos indexing y optimización',
+          'Docker containerización para developers',
+          'Git workflow estrategias para equipos',
+          'Testing strategies en JavaScript y frameworks',
+          'Async/Await vs Promises comparativa',
+          'Microservices arquitectura y patrones',
+          'GraphQL vs REST cuándo usar cada uno',
+          'Vue.js 3 Composition API guía completa',
+          'Python web scraping técnicas avanzadas',
+          'React performance optimization técnicas',
+          'JWT authentication implementación segura',
+          'MongoDB aggregation pipeline avanzado',
+          'Express.js middleware patterns',
+          'Webpack configuración y optimización',
+          'Next.js 13+ App Router y Server Components',
+          'Tailwind CSS utility-first approach',
+          'PostgreSQL consultas complejas y CTE',
+          'Redis caching strategies',
+          'Nginx configuración para developers',
+          'API Rate Limiting implementación',
+          'Kubernetes básico para developers',
+          'CI/CD pipelines con GitHub Actions',
+          'Serverless functions con Vercel/Netlify',
+          'Web Security mejores prácticas',
+          'PWA Progressive Web Apps desarrollo',
+          'WebAssembly introducción práctica',
+          'Deno vs Node.js comparativa',
+          'GraphQL subscriptions tiempo real',
+          'Docker Compose multi-container apps'
+        ];
+        
+        const categories = ['frontend', 'backend', 'fullstack', 'mobile', 'devops'];
+        
+        function getRandomCategory() {
+          return categories[Math.floor(Math.random() * categories.length)];
+        }
+        
+        function getRandomTopics(count) {
+          const shuffled = [...programmingTopics].sort(() => 0.5 - Math.random());
+          return shuffled.slice(0, count);
+        }
+        
+        function generateSlug(title) {
+          return slug(title.toLowerCase().replace(/[^\w\s-]/g, '').trim(), { lower: true, strict: true });
+        }
+        
+        function calculateReadTime(content) {
+          const wordsPerMinute = 200;
+          const wordCount = content.split(/\s+/).length;
+          return Math.ceil(wordCount / wordsPerMinute);
+        }
+        
+        async function generateSingleArticle(topic, articleNumber) {
+          try {
+            console.log(`🚀 Generando artículo ${articleNumber}: ${topic}`);
+            
+            const category = getRandomCategory();
+            
+            const prompt = `
+            Eres un experto programador y blogger técnico. Escribe un artículo de blog COMPLETO y DETALLADO sobre "${topic}" en español.
+            
+            INSTRUCCIONES ESPECÍFICAS:
+            1. Título atractivo y SEO-friendly (máximo 60 caracteres)
+            2. Introducción clara que explique qué aprenderá el lector
+            3. Al menos 5-7 secciones principales con subtítulos
+            4. Ejemplos de código REALES y funcionales con explicaciones detalladas
+            5. Comparaciones "antes/después" con emojis ❌ ✅
+            6. Consejos prácticos y mejores prácticas
+            7. Conclusión con puntos clave
+            8. Entre 1200-1800 palabras
+            
+            FORMATO REQUERIDO (muy importante):
+            - Usar SOLO etiquetas HTML: <h2>, <h3>, <p>, <pre><code>, <strong>, <em>, <ul>, <li>
+            - Los subtítulos principales deben ser <h2>
+            - Los subsecciones deben ser <h3>
+            - El código debe estar en <pre><code class="language-javascript"> (o el lenguaje apropiado)
+            - Incluir comentarios en el código para explicar líneas importantes
+            - Usar <strong> para resaltar palabras clave
+            
+            ESTRUCTURA SUGERIDA:
+            <h2>Introducción</h2>
+            <p>Explicar el problema y por qué es importante...</p>
+            
+            <h2>¿Qué es [concepto]?</h2>
+            <p>Definición clara...</p>
+            
+            <h2>Problemas Comunes</h2>
+            <p>Ejemplos de lo que NO hacer...</p>
+            <pre><code class="language-javascript">
+            // ❌ Código problemático
+            // Explicar por qué está mal
+            </code></pre>
+            
+            <h2>Soluciones y Mejores Prácticas</h2>
+            <p>Explicar las soluciones...</p>
+            <pre><code class="language-javascript">
+            // ✅ Código mejorado
+            // Explicar por qué es mejor
+            </code></pre>
+            
+            <h2>Ejemplos Prácticos</h2>
+            <p>Casos de uso reales...</p>
+            
+            <h2>Tips Adicionales</h2>
+            <ul>
+              <li>Consejo 1</li>
+              <li>Consejo 2</li>
+            </ul>
+            
+            <h2>Conclusión</h2>
+            <p>Resumen de puntos clave...</p>
+            
+            IMPORTANTE: El artículo debe ser EDUCATIVO, PRÁCTICO y ÚTIL para desarrolladores de todos los niveles.
+            `;
+            
+            const response = await axios.post(
+              'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+              {
+                contents: [{
+                  parts: [{
+                    text: prompt
+                  }]
+                }],
+                generationConfig: {
+                  temperature: 0.8,
+                  topK: 40,
+                  topP: 0.95,
+                  maxOutputTokens: 4096
+                }
+              },
+              {
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                params: {
+                  key: process.env.GEMINI_API_KEY
+                }
+              }
+            );
+            
+            const generatedContent = response.data.candidates[0].content.parts[0].text;
+            
+            // Limpiar y procesar el contenido
+            const cleanContent = generatedContent
+              .replace(/```html\n/g, '')
+              .replace(/```\n/g, '')
+              .replace(/```/g, '')
+              .trim();
+            
+            // Extraer título del contenido
+            const $ = cheerio.load(cleanContent);
+            let title = $('h1').first().text() || $('h2').first().text() || `Guía: ${topic}`;
+            title = title.substring(0, 60).trim();
+            
+            // Generar resumen inteligente
+            const firstParagraph = $('p').first().text().substring(0, 150).trim() + '...';
+            const summary = firstParagraph || `Aprende todo sobre ${topic} con ejemplos prácticos y mejores prácticas.`;
+            
+            // Extraer tags del contenido
+            const contentText = $.text().toLowerCase();
+            const possibleTags = [
+              'JavaScript', 'React', 'Node.js', 'TypeScript', 'CSS', 'HTML',
+              'Python', 'Vue.js', 'API', 'Database', 'Docker', 'Git',
+              'Performance', 'Security', 'Testing', 'DevOps', 'Frontend',
+              'Backend', 'Full Stack', 'Mobile', 'Web Development'
+            ];
+            
+            const detectedTags = possibleTags.filter(tag => 
+              contentText.includes(tag.toLowerCase()) || topic.toLowerCase().includes(tag.toLowerCase())
+            ).slice(0, 4);
+            
+            if (detectedTags.length < 2) {
+              detectedTags.push('Programming', 'Development');
+            }
+            
+            // Generar metadatos del artículo
+            const now = new Date();
+            const articleData = {
+              id: `${Date.now()}-${articleNumber}`,
+              title: title,
+              summary: summary,
+              content: cleanContent,
+              author: 'DevTips Bot',
+              publishedAt: now.toISOString(),
+              publishedDate: now.toLocaleDateString('es-ES', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              }),
+              tags: detectedTags,
+              category: category,
+              readTime: calculateReadTime(cleanContent),
+              slug: generateSlug(title),
+              seoTitle: `${title} - DevTips Programming Blog`,
+              seoDescription: summary,
+              canonicalUrl: `https://tu-dominio.com/articulo/${generateSlug(title)}`,
+              siteUrl: 'https://tu-dominio.com'
+            };
+            
+            // Cargar template y generar HTML
+            const templateContent = await fs.readFile('templates/article-template.html', 'utf8');
+            const template = Handlebars.compile(templateContent);
+            const articleHtml = template(articleData);
+            
+            // Guardar artículo
+            const fileName = `${articleData.slug}.html`;
+            await fs.ensureDir('public/articles');
+            await fs.writeFile(`public/articles/${fileName}`, articleHtml);
+            
+            console.log(`✅ Artículo ${articleNumber} generado: ${fileName}`);
+            console.log(`   📝 Título: ${articleData.title}`);
+            console.log(`   📂 Categoría: ${articleData.category}`);
+            console.log(`   🏷️ Tags: ${articleData.tags.join(', ')}`);
+            console.log(`   ⏱️ Tiempo lectura: ${articleData.readTime} min`);
+            console.log(`   📊 Palabras: ~${cleanContent.split(' ').length}`);
+            
+            return {
+              id: articleData.id,
+              title: articleData.title,
+              summary: articleData.summary,
+              author: articleData.author,
+              publishedAt: articleData.publishedAt,
+              tags: articleData.tags,
+              category: articleData.category,
+              readTime: articleData.readTime,
+              slug: articleData.slug,
+              featured: false
+            };
+            
+          } catch (error) {
+            console.error(`❌ Error generando artículo ${articleNumber}:`, error.response?.data || error.message);
+            return null;
+          }
+        }
+        
+        async function generateArticles() {
+          try {
+            const articleCount = parseInt(process.env.ARTICLE_COUNT) || 3;
+            const specificTopics = process.env.SPECIFIC_TOPICS?.split(',').map(t => t.trim()).filter(Boolean) || [];
+            
+            console.log(`🎯 Generando ${articleCount} artículos de programación...`);
+            
+            let topics;
+            if (specificTopics.length > 0) {
+              topics = specificTopics.slice(0, articleCount);
+              console.log(`📋 Usando temas específicos: ${topics.join(', ')}`);
+            } else {
+              topics = getRandomTopics(articleCount);
+              console.log(`🎲 Temas aleatorios seleccionados: ${topics.join(', ')}`);
+            }
+            
+            // Cargar índice existente
+            const indexPath = 'public/articles/index.json';
+            let existingArticles = [];
+            
+            try {
+              const existingIndex = await fs.readFile(indexPath, 'utf8');
+              existingArticles = JSON.parse(existingIndex);
+              console.log(`📚 Encontrados ${existingArticles.length} artículos existentes`);
+            } catch (error) {
+              console.log('📁 Creando nuevo índice de artículos');
+            }
+            
+            // Generar artículos secuencialmente para evitar rate limits
+            const newArticles = [];
+            for (let i = 0; i < topics.length; i++) {
+              const article = await generateSingleArticle(topics[i], i + 1);
+              if (article) {
+                newArticles.push(article);
+                // Pequeña pausa entre requests
+                if (i < topics.length - 1) {
+                  await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+              }
+            }
+            
+            if (newArticles.length > 0) {
+              // El primer artículo del día es destacado
+              if (newArticles[0]) {
+                newArticles[0].featured = true;
+              }
+              
+              // Agregar nuevos artículos al inicio
+              const allArticles = [...newArticles, ...existingArticles];
+              
+              // Mantener solo los últimos 100 artículos
+              const limitedArticles = allArticles.slice(0, 100);
+              
+              // Guardar índice actualizado
+              await fs.writeFile(indexPath, JSON.stringify(limitedArticles, null, 2));
+              
+              console.log(`\n🎉 RESUMEN DE GENERACIÓN:`);
+              console.log(`   ✅ Artículos nuevos: ${newArticles.length}`);
+              console.log(`   📊 Total en el blog: ${limitedArticles.length}`);
+              console.log(`   🌟 Artículo destacado: ${newArticles[0]?.title || 'N/A'}`);
+              
+              // Output para GitHub Actions
+              console.log(`::set-output name=articles-generated::${newArticles.length}`);
+              console.log(`::set-output name=featured-title::${newArticles[0]?.title || ''}`);
+            } else {
+              console.log('❌ No se pudo generar ningún artículo');
+              process.exit(1);
+            }
+            
+          } catch (error) {
+            console.error('💥 Error general en la generación:', error);
+            process.exit(1);
+          }
+        }
+        
+        generateArticles();
+        EOF
+        
+        node generate-articles.js
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action Bot"
+        git add public/articles/
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "🤖 Generate daily programming articles (3 new posts)"
+          git push
+        fi

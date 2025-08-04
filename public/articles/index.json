@@ -1,0 +1,69 @@
+[
+  {
+    "id": "1",
+    "title": "10 Tips para Optimizar tu Código JavaScript",
+    "summary": "Descubre las mejores prácticas para escribir JavaScript más eficiente y mantenible. Desde el uso correcto de async/await hasta técnicas de optimización de performance que todo developer debería conocer.",
+    "author": "DevTips Bot",
+    "publishedAt": "2024-01-15T10:00:00Z",
+    "tags": ["JavaScript", "Performance", "Best Practices"],
+    "category": "frontend",
+    "readTime": 5,
+    "slug": "10-tips-optimizar-javascript",
+    "featured": true
+  },
+  {
+    "id": "2",
+    "title": "Guía Completa de React Hooks",
+    "summary": "Todo lo que necesitas saber sobre React Hooks. useState, useEffect, useContext y hooks personalizados explicados con ejemplos prácticos y casos de uso reales.",
+    "author": "DevTips Bot",
+    "publishedAt": "2024-01-14T15:30:00Z",
+    "tags": ["React", "Hooks", "Frontend"],
+    "category": "frontend",
+    "readTime": 8,
+    "slug": "guia-completa-react-hooks"
+  },
+  {
+    "id": "3",
+    "title": "API REST vs GraphQL: ¿Cuál Elegir?",
+    "summary": "Comparativa detallada entre REST y GraphQL. Analizamos las ventajas, desventajas y casos de uso ideales para cada tecnología con ejemplos reales.",
+    "author": "DevTips Bot",
+    "publishedAt": "2024-01-13T09:15:00Z",
+    "tags": ["API", "REST", "GraphQL", "Backend"],
+    "category": "backend",
+    "readTime": 6,
+    "slug": "api-rest-vs-graphql"
+  },
+  {
+    "id": "4",
+    "title": "Docker para Developers: Primeros Pasos",
+    "summary": "Introducción práctica a Docker. Aprende a containerizar tus aplicaciones, crear Dockerfiles eficientes y orquestar servicios con docker-compose.",
+    "author": "DevTips Bot",
+    "publishedAt": "2024-01-12T14:20:00Z",
+    "tags": ["Docker", "DevOps", "Containerization"],
+    "category": "devops",
+    "readTime": 7,
+    "slug": "docker-para-developers"
+  },
+  {
+    "id": "5",
+    "title": "TypeScript: Tipos Avanzados y Utility Types",
+    "summary": "Domina TypeScript con tipos avanzados, mapped types, conditional types y utility types. Ejemplos prácticos para llevar tu código al siguiente nivel.",
+    "author": "DevTips Bot",
+    "publishedAt": "2024-01-11T11:45:00Z",
+    "tags": ["TypeScript", "Advanced Types", "Frontend"],
+    "category": "frontend",
+    "readTime": 9,
+    "slug": "typescript-tipos-avanzados"
+  },
+  {
+    "id": "6",
+    "title": "Node.js Performance: Optimización y Profiling",
+    "summary": "Técnicas avanzadas para optimizar aplicaciones Node.js. Profiling, cluster mode, worker threads y mejores prácticas para aplicaciones de alto rendimiento.",
+    "author": "DevTips Bot",
+    "publishedAt": "2024-01-10T13:20:00Z",
+    "tags": ["Node.js", "Performance", "Backend", "Optimization"],
+    "category": "backend",
+    "readTime": 10,
+    "slug": "nodejs-performance-optimization"
+  }
+]

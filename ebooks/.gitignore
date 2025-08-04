@@ -1,0 +1,14 @@
+# Ignore all ebook files for privacy and size
+# Only keep this .gitignore file in the repository
+*.pdf
+*.html
+*.json
+!.gitignore
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS specific files
+.DS_Store
+Thumbs.db

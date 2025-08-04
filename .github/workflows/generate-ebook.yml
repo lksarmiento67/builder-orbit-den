@@ -1,0 +1,504 @@
+name: Generate Programming Ebook
+
+on:
+  schedule:
+    # Ejecutar cada 2 semanas (bi-weekly) los domingos a las 12:00 PM UTC
+    - cron: '0 12 * * 0/14'
+  workflow_dispatch:
+    inputs:
+      theme:
+        description: 'Ebook theme/focus'
+        required: false
+        default: ''
+      max_articles:
+        description: 'Maximum articles to include'
+        required: false
+        default: '15'
+
+jobs:
+  generate-ebook:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        npm install axios fs-extra handlebars cheerio puppeteer
+        
+    - name: Generate ebook with Gemini
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        EBOOK_THEME: ${{ github.event.inputs.theme || '' }}
+        MAX_ARTICLES: ${{ github.event.inputs.max_articles || '15' }}
+      run: |
+        cat > generate-ebook.js << 'EOF'
+        const axios = require('axios');
+        const fs = require('fs-extra');
+        const Handlebars = require('handlebars');
+        const cheerio = require('cheerio');
+        const puppeteer = require('puppeteer');
+        const path = require('path');
+        
+        async function loadArticles() {
+          try {
+            const indexPath = 'public/articles/index.json';
+            if (!fs.existsSync(indexPath)) {
+              throw new Error('No articles index found');
+            }
+            
+            const articlesData = await fs.readFile(indexPath, 'utf8');
+            const articles = JSON.parse(articlesData);
+            
+            console.log(`📚 Found ${articles.length} articles in index`);
+            return articles;
+          } catch (error) {
+            console.error('Error loading articles:', error);
+            return [];
+          }
+        }
+        
+        async function loadArticleContent(slug) {
+          try {
+            const articlePath = `public/articles/${slug}.html`;
+            if (!fs.existsSync(articlePath)) {
+              console.warn(`Article file not found: ${slug}.html`);
+              return null;
+            }
+            
+            const htmlContent = await fs.readFile(articlePath, 'utf8');
+            const $ = cheerio.load(htmlContent);
+            
+            // Extraer contenido principal
+            const content = $('.article-content').html() || $('main').html() || '';
+            
+            if (!content) {
+              console.warn(`No content found in article: ${slug}`);
+              return null;
+            }
+            
+            return content;
+          } catch (error) {
+            console.error(`Error loading article content ${slug}:`, error);
+            return null;
+          }
+        }
+        
+        async function generateEbookContent(articles, theme) {
+          try {
+            console.log(`🤖 Generating ebook content with AI...`);
+            
+            // Preparar información de artículos para Gemini
+            const articlesInfo = articles.map(article => ({
+              title: article.title,
+              summary: article.summary,
+              category: article.category,
+              tags: article.tags.join(', '),
+              readTime: article.readTime
+            }));
+            
+            const prompt = `
+            Eres un experto en crear ebooks profesionales de programación para venta en Hotmart.
+            
+            TAREA: Crear un ebook completo basado en los siguientes artículos:
+            
+            ${articlesInfo.map((article, i) => `
+            ${i + 1}. "${article.title}"
+               - Categoría: ${article.category}
+               - Tags: ${article.tags}
+               - Tiempo de lectura: ${article.readTime} min
+               - Resumen: ${article.summary}
+            `).join('\n')}
+            
+            INSTRUCCIONES PARA EL EBOOK:
+            
+            1. TÍTULO DEL EBOOK: Crea un título comercial atractivo para Hotmart (máximo 50 caracteres)
+            ${theme ? `   - Tema específico: ${theme}` : ''}
+            
+            2. DESCRIPCIÓN COMERCIAL: Una descripción persuasiva para ventas (150-200 palabras)
+            
+            3. ESTRUCTURA DEL EBOOK:
+               - Página de título profesional
+               - Tabla de contenidos
+               - Introducción motivacional
+               - Capítulos organizados por tema/categoría
+               - Conclusión con próximos pasos
+               - Recursos adicionales
+               - Sobre el autor
+            
+            4. ESTILO HTML PROFESIONAL:
+               - Usar CSS moderno y elegante
+               - Tipografía profesional
+               - Colores corporativos (#6366f1 como primario)
+               - Espaciado y márgenes apropiados para PDF
+               - Páginas claramente separadas
+               - Headers y footers consistentes
+            
+            5. CONTENIDO:
+               - Reorganizar y mejorar el contenido de los artículos
+               - Eliminar redundancias
+               - Agregar transiciones entre secciones
+               - Incluir ejemplos adicionales si es necesario
+               - Mantener un flujo narrativo coherente
+            
+            FORMATO DE RESPUESTA:
+            Responde con un objeto JSON con esta estructura:
+            
+            {
+              "title": "Título comercial del ebook",
+              "description": "Descripción comercial persuasiva",
+              "author": "DevTips Pro",
+              "price": "47",
+              "currency": "USD",
+              "pages": 80,
+              "htmlContent": "HTML completo del ebook con CSS inline y estructura de páginas"
+            }
+            
+            IMPORTANTE:
+            - El HTML debe ser auto-contenido (CSS inline)
+            - Usar page-break-after: always; para separar páginas
+            - Incluir portada atractiva
+            - Código debe estar bien formateado
+            - Diseño debe verse profesional en PDF
+            `;
+            
+            const response = await axios.post(
+              'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+              {
+                contents: [{
+                  parts: [{
+                    text: prompt
+                  }]
+                }],
+                generationConfig: {
+                  temperature: 0.7,
+                  topK: 40,
+                  topP: 0.95,
+                  maxOutputTokens: 8192
+                }
+              },
+              {
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                params: {
+                  key: process.env.GEMINI_API_KEY
+                }
+              }
+            );
+            
+            const generatedText = response.data.candidates[0].content.parts[0].text;
+            
+            // Intentar extraer JSON de la respuesta
+            let ebookData;
+            try {
+              // Buscar JSON en la respuesta
+              const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                ebookData = JSON.parse(jsonMatch[0]);
+              } else {
+                throw new Error('No JSON found in response');
+              }
+            } catch (parseError) {
+              console.warn('Failed to parse AI response as JSON, creating manual structure');
+              
+              // Crear estructura manual si falla el parsing
+              ebookData = {
+                title: `Guía Completa de Programación ${new Date().getFullYear()}`,
+                description: "Una guía completa con los mejores tips y técnicas de programación para desarrolladores modernos.",
+                author: "DevTips Pro",
+                price: "47",
+                currency: "USD", 
+                pages: 80,
+                htmlContent: await generateFallbackEbook(articles, generatedText)
+              };
+            }
+            
+            return ebookData;
+            
+          } catch (error) {
+            console.error('Error generating ebook content:', error);
+            throw error;
+          }
+        }
+        
+        async function generateFallbackEbook(articles, aiContent) {
+          // Crear un ebook básico si falla la generación con IA
+          const html = `
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Guía Completa de Programación</title>
+            <style>
+              @page {
+                margin: 2cm;
+                @bottom-center {
+                  content: counter(page);
+                }
+              }
+              
+              body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 800px;
+                margin: 0 auto;
+              }
+              
+              .cover {
+                text-align: center;
+                padding: 4rem 2rem;
+                background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                color: white;
+                page-break-after: always;
+                height: 80vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+              }
+              
+              .cover h1 {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                font-weight: bold;
+              }
+              
+              .cover p {
+                font-size: 1.2rem;
+                opacity: 0.9;
+              }
+              
+              .chapter {
+                page-break-before: always;
+                padding: 2rem 0;
+              }
+              
+              h1, h2, h3 {
+                color: #6366f1;
+                margin-top: 2rem;
+              }
+              
+              pre {
+                background: #f8f9fa;
+                padding: 1rem;
+                border-radius: 8px;
+                overflow-x: auto;
+                border-left: 4px solid #6366f1;
+              }
+              
+              code {
+                background: #f1f3f4;
+                padding: 0.2rem 0.4rem;
+                border-radius: 4px;
+                font-family: 'Fira Code', monospace;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="cover">
+              <h1>Guía Completa de Programación</h1>
+              <p>Los mejores tips y técnicas para desarrolladores modernos</p>
+              <p>Por DevTips Pro</p>
+              <p>${new Date().getFullYear()}</p>
+            </div>
+            
+            <div class="chapter">
+              <h1>Tabla de Contenidos</h1>
+              ${articles.map((article, i) => `
+                <p>${i + 1}. ${article.title}</p>
+              `).join('')}
+            </div>
+            
+            ${articles.map((article, i) => `
+              <div class="chapter">
+                <h1>Capítulo ${i + 1}: ${article.title}</h1>
+                <p><strong>Categoría:</strong> ${article.category}</p>
+                <p><strong>Tiempo de lectura:</strong> ${article.readTime} minutos</p>
+                <h2>Introducción</h2>
+                <p>${article.summary}</p>
+                <p>Este capítulo cubre conceptos importantes de ${article.category} que todo desarrollador debe conocer.</p>
+              </div>
+            `).join('')}
+            
+            <div class="chapter">
+              <h1>Conclusión</h1>
+              <p>En esta guía hemos cubierto ${articles.length} temas fundamentales de programación.</p>
+              <p>Continúa aprendiendo y mejorando tus habilidades de desarrollo.</p>
+            </div>
+          </body>
+          </html>
+          `;
+          
+          return html;
+        }
+        
+        async function generatePDF(htmlContent, outputPath) {
+          try {
+            console.log('🖨️ Generating PDF from HTML...');
+            
+            const browser = await puppeteer.launch({
+              headless: 'new',
+              args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+            
+            const page = await browser.newPage();
+            await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+            
+            await page.pdf({
+              path: outputPath,
+              format: 'A4',
+              printBackground: true,
+              margin: {
+                top: '2cm',
+                right: '2cm',
+                bottom: '2cm',
+                left: '2cm'
+              },
+              displayHeaderFooter: true,
+              headerTemplate: '<div></div>',
+              footerTemplate: '<div style="font-size: 10px; text-align: center; width: 100%;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>'
+            });
+            
+            await browser.close();
+            console.log(`✅ PDF generated: ${outputPath}`);
+            
+          } catch (error) {
+            console.error('Error generating PDF:', error);
+            throw error;
+          }
+        }
+        
+        async function generateEbook() {
+          try {
+            console.log('📖 Starting ebook generation process...');
+            
+            // Cargar artículos
+            const allArticles = await loadArticles();
+            if (allArticles.length === 0) {
+              throw new Error('No articles found to create ebook');
+            }
+            
+            // Seleccionar artículos para el ebook
+            const maxArticles = parseInt(process.env.MAX_ARTICLES) || 15;
+            const selectedArticles = allArticles.slice(0, Math.min(maxArticles, allArticles.length));
+            
+            console.log(`📚 Selected ${selectedArticles.length} articles for ebook`);
+            
+            // Generar contenido del ebook con IA
+            const theme = process.env.EBOOK_THEME || '';
+            const ebookData = await generateEbookContent(selectedArticles, theme);
+            
+            // Crear directorio para ebooks
+            const ebooksDir = 'ebooks';
+            await fs.ensureDir(ebooksDir);
+            
+            // Generar nombre del archivo
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const ebookSlug = ebookData.title.toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .slice(0, 30);
+            
+            const baseName = `${timestamp}-${ebookSlug}`;
+            const htmlPath = path.join(ebooksDir, `${baseName}.html`);
+            const pdfPath = path.join(ebooksDir, `${baseName}.pdf`);
+            const metaPath = path.join(ebooksDir, `${baseName}.json`);
+            
+            // Guardar HTML del ebook
+            await fs.writeFile(htmlPath, ebookData.htmlContent);
+            
+            // Generar PDF
+            await generatePDF(ebookData.htmlContent, pdfPath);
+            
+            // Guardar metadatos
+            const metadata = {
+              ...ebookData,
+              htmlContent: undefined, // No incluir HTML en metadata
+              generatedAt: new Date().toISOString(),
+              articlesUsed: selectedArticles.length,
+              fileSize: (await fs.stat(pdfPath)).size,
+              files: {
+                pdf: `${baseName}.pdf`,
+                html: `${baseName}.html`,
+                metadata: `${baseName}.json`
+              }
+            };
+            
+            await fs.writeFile(metaPath, JSON.stringify(metadata, null, 2));
+            
+            // Actualizar índice de ebooks
+            const ebooksIndexPath = path.join(ebooksDir, 'index.json');
+            let ebooksIndex = [];
+            
+            try {
+              const existingIndex = await fs.readFile(ebooksIndexPath, 'utf8');
+              ebooksIndex = JSON.parse(existingIndex);
+            } catch (error) {
+              console.log('Creating new ebooks index');
+            }
+            
+            ebooksIndex.unshift(metadata);
+            ebooksIndex = ebooksIndex.slice(0, 20); // Mantener últimos 20 ebooks
+            
+            await fs.writeFile(ebooksIndexPath, JSON.stringify(ebooksIndex, null, 2));
+            
+            console.log(`\n🎉 EBOOK GENERADO EXITOSAMENTE:`);
+            console.log(`   ���� Título: ${ebookData.title}`);
+            console.log(`   👤 Autor: ${ebookData.author}`);
+            console.log(`   💰 Precio sugerido: $${ebookData.price} ${ebookData.currency}`);
+            console.log(`   📄 Páginas estimadas: ${ebookData.pages}`);
+            console.log(`   📚 Artículos incluidos: ${selectedArticles.length}`);
+            console.log(`   📁 Archivo PDF: ${pdfPath}`);
+            console.log(`   💾 Tamaño: ${Math.round(metadata.fileSize / 1024)} KB`);
+            
+            // Output para GitHub Actions
+            console.log(`::set-output name=ebook-title::${ebookData.title}`);
+            console.log(`::set-output name=pdf-file::${baseName}.pdf`);
+            console.log(`::set-output name=articles-count::${selectedArticles.length}`);
+            
+          } catch (error) {
+            console.error('💥 Error generating ebook:', error);
+            process.exit(1);
+          }
+        }
+        
+        generateEbook();
+        EOF
+        
+        node generate-ebook.js
+        
+    - name: Create .gitignore for ebooks if not exists
+      run: |
+        if [ ! -f ebooks/.gitignore ]; then
+          mkdir -p ebooks
+          echo "# Ignore all ebook files for privacy and size" > ebooks/.gitignore
+          echo "*.pdf" >> ebooks/.gitignore
+          echo "*.html" >> ebooks/.gitignore
+          echo "*.json" >> ebooks/.gitignore
+          echo "!.gitignore" >> ebooks/.gitignore
+          echo "📁 Created ebooks/.gitignore"
+        fi
+        
+    - name: Commit metadata only (PDFs are ignored)
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action Bot"
+        
+        # Solo agregar .gitignore si es nuevo
+        git add ebooks/.gitignore
+        
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "📚 Generated new programming ebook (PDF excluded from repo)"
+          git push
+        fi

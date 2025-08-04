@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Todo lo que necesitas saber sobre React Hooks. useState, useEffect, useContext y hooks personalizados explicados con ejemplos prácticos."
+    />
+    <meta name="keywords" content="React, Hooks, Frontend" />
+    <meta name="author" content="DevTips Bot" />
+    <meta
+      property="og:title"
+      content="Guía Completa de React Hooks - DevTips Programming Blog"
+    />
+    <meta
+      property="og:description"
+      content="Todo lo que necesitas saber sobre React Hooks. useState, useEffect, useContext y hooks personalizados explicados con ejemplos prácticos."
+    />
+    <meta property="og:type" content="article" />
+    <meta property="article:published_time" content="2024-01-14T15:30:00Z" />
+    <meta property="article:author" content="DevTips Bot" />
+    <meta property="article:section" content="frontend" />
+    <meta property="article:tag" content="React, Hooks, Frontend" />
+    <title>Guía Completa de React Hooks - DevTips Programming Blog</title>
+    <link
+      rel="canonical"
+      href="https://tu-dominio.com/articulo/guia-completa-react-hooks"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Guía Completa de React Hooks",
+        "description": "Todo lo que necesitas saber sobre React Hooks. useState, useEffect, useContext y hooks personalizados explicados con ejemplos prácticos.",
+        "author": {
+          "@type": "Person",
+          "name": "DevTips Bot"
+        },
+        "datePublished": "2024-01-14T15:30:00Z",
+        "dateModified": "2024-01-14T15:30:00Z",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "https://tu-dominio.com/articulo/guia-completa-react-hooks"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "DevTips",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://tu-dominio.com/logo.png"
+          }
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <article>
+      <header>
+        <h1>Guía Completa de React Hooks</h1>
+        <div class="article-meta">
+          <span class="author">DevTips Bot</span>
+          <time datetime="2024-01-14T15:30:00Z">14 de enero de 2024</time>
+          <span class="read-time">8 min de lectura</span>
+          <span class="category">frontend</span>
+        </div>
+        <div class="tags">
+          <span class="tag">React</span>
+          <span class="tag">Hooks</span>
+          <span class="tag">Frontend</span>
+        </div>
+        <div class="summary">
+          Todo lo que necesitas saber sobre React Hooks. useState, useEffect,
+          useContext y hooks personalizados explicados con ejemplos prácticos y
+          casos de uso reales.
+        </div>
+      </header>
+      <main class="article-content">
+        <h2>¿Qué son los React Hooks?</h2>
+        <p>
+          Los <strong>React Hooks</strong> son funciones especiales que te
+          permiten "engancharte" al estado y otras características de React
+          desde componentes funcionales. Introducidos en React 16.8,
+          revolucionaron la forma de escribir componentes React.
+        </p>
+
+        <h2>Ventajas de los Hooks</h2>
+        <ul>
+          <li>
+            <strong>Simplicidad:</strong> Eliminan la necesidad de clases
+            complejas
+          </li>
+          <li>
+            <strong>Reutilización:</strong> Facilitan compartir lógica entre
+            componentes
+          </li>
+          <li>
+            <strong>Legibilidad:</strong> Código más limpio y fácil de entender
+          </li>
+          <li><strong>Performance:</strong> Optimizaciones automáticas</li>
+        </ul>
+
+        <h2>useState: Manejo de Estado Local</h2>
+        <p>
+          El hook más básico y fundamental. Permite agregar estado a componentes
+          funcionales.
+        </p>
+
+        <h3>Sintaxis Básica</h3>
+        <pre><code class="language-javascript">
+import React, { useState } from 'react';
+
+function Counter() {
+  // Declarar una variable de estado llamada "count"
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Has hecho clic {count} veces&lt;/p&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Hacer clic
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+            </code></pre>
+
+        <h3>Estados Complejos</h3>
+        <pre><code class="language-javascript">
+function UserProfile() {
+  const [user, setUser] = useState({
+    name: '',
+    email: '',
+    age: 0
+  });
+
+  const updateUser = (field, value) =&gt; {
+    setUser(prevUser =&gt; ({
+      ...prevUser,
+      [field]: value
+    }));
+  };
+
+  return (
+    &lt;form&gt;
+      &lt;input
+        value={user.name}
+        onChange={(e) =&gt; updateUser('name', e.target.value)}
+        placeholder="Nombre"
+      /&gt;
+      &lt;input
+        value={user.email}
+        onChange={(e) =&gt; updateUser('email', e.target.value)}
+        placeholder="Email"
+      /&gt;
+    &lt;/form&gt;
+  );
+}
+            </code></pre>
+
+        <h2>useEffect: Efectos Secundarios</h2>
+        <p>
+          <strong>useEffect</strong> te permite realizar efectos secundarios en
+          componentes funcionales. Es equivalente a componentDidMount,
+          componentDidUpdate y componentWillUnmount combinados.
+        </p>
+
+        <h3>Efecto Básico</h3>
+        <pre><code class="language-javascript">
+import React, { useState, useEffect } from 'react';
+
+function DocumentTitle() {
+  const [count, setCount] = useState(0);
+
+  // Similar a componentDidMount y componentDidUpdate:
+  useEffect(() =&gt; {
+    document.title = `Has hecho clic ${count} veces`;
+  });
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Has hecho clic {count} veces&lt;/p&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Hacer clic
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+            </code></pre>
+
+        <h3>Efecto con Cleanup</h3>
+        <pre><code class="language-javascript">
+function Timer() {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() =&gt; {
+    const interval = setInterval(() =&gt; {
+      setSeconds(prevSeconds =&gt; prevSeconds + 1);
+    }, 1000);
+
+    // Cleanup function (equivalente a componentWillUnmount)
+    return () =&gt; clearInterval(interval);
+  }, []); // Array vacío significa que solo se ejecuta una vez
+
+  return &lt;div&gt;Segundos: {seconds}&lt;/div&gt;;
+}
+            </code></pre>
+
+        <h3>Efecto Condicional</h3>
+        <pre><code class="language-javascript">
+function UserData({ userId }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() =&gt; {
+    const fetchUser = async () =&gt; {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/users/${userId}`);
+        const userData = await response.json();
+        setUser(userData);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [userId]); // Se ejecuta cuando userId cambia
+
+  if (loading) return &lt;div&gt;Cargando...&lt;/div&gt;;
+  if (!user) return &lt;div&gt;Usuario no encontrado&lt;/div&gt;;
+
+  return &lt;div&gt;Hola, {user.name}!&lt;/div&gt;;
+}
+            </code></pre>
+
+        <h2>useContext: Compartir Estado Global</h2>
+        <p>
+          <strong>useContext</strong> permite consumir contexto sin necesidad de
+          wrapper components.
+        </p>
+
+        <pre><code class="language-javascript">
+// Crear contexto
+const ThemeContext = React.createContext();
+
+// Proveedor del contexto
+function App() {
+  const [theme, setTheme] = useState('light');
+
+  return (
+    &lt;ThemeContext.Provider value={{ theme, setTheme }}&gt;
+      &lt;Header /&gt;
+      &lt;Main /&gt;
+    &lt;/ThemeContext.Provider&gt;
+  );
+}
+
+// Consumir contexto con useContext
+function Header() {
+  const { theme, setTheme } = useContext(ThemeContext);
+
+  return (
+    &lt;header style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff' }}&gt;
+      &lt;button onClick={() =&gt; setTheme(theme === 'dark' ? 'light' : 'dark')}&gt;
+        Cambiar tema
+      &lt;/button&gt;
+    &lt;/header&gt;
+  );
+}
+            </code></pre>
+
+        <h2>Hooks Personalizados</h2>
+        <p>
+          Puedes crear tus propios hooks para reutilizar lógica entre
+          componentes.
+        </p>
+
+        <h3>Hook para Fetch de Datos</h3>
+        <pre><code class="language-javascript">
+// Hook personalizado
+function useFetch(url) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() =&gt; {
+    const fetchData = async () =&gt; {
+      try {
+        setLoading(true);
+        const response = await fetch(url);
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [url]);
+
+  return { data, loading, error };
+}
+
+// Uso del hook personalizado
+function UserList() {
+  const { data: users, loading, error } = useFetch('/api/users');
+
+  if (loading) return &lt;div&gt;Cargando usuarios...&lt;/div&gt;;
+  if (error) return &lt;div&gt;Error: {error.message}&lt;/div&gt;;
+
+  return (
+    &lt;ul&gt;
+      {users.map(user =&gt; (
+        &lt;li key={user.id}&gt;{user.name}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}
+            </code></pre>
+
+        <h3>Hook para Local Storage</h3>
+        <pre><code class="language-javascript">
+function useLocalStorage(key, initialValue) {
+  // Obtener valor inicial del localStorage
+  const [storedValue, setStoredValue] = useState(() =&gt; {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(error);
+      return initialValue;
+    }
+  });
+
+  // Función para actualizar el estado y localStorage
+  const setValue = (value) =&gt; {
+    try {
+      setStoredValue(value);
+      window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return [storedValue, setValue];
+}
+
+// Uso
+function Settings() {
+  const [theme, setTheme] = useLocalStorage('theme', 'light');
+  
+  return (
+    &lt;button onClick={() =&gt; setTheme(theme === 'light' ? 'dark' : 'light')}&gt;
+      Tema actual: {theme}
+    &lt;/button&gt;
+  );
+}
+            </code></pre>
+
+        <h2>Reglas de los Hooks</h2>
+        <p>
+          Para que los hooks funcionen correctamente, debes seguir estas reglas:
+        </p>
+
+        <h3>1. Solo llama Hooks en el nivel superior</h3>
+        <pre><code class="language-javascript">
+// ❌ No hagas esto
+function BadComponent() {
+  if (someCondition) {
+    const [count, setCount] = useState(0); // ❌ En condicional
+  }
+  
+  for (let i = 0; i < 10; i++) {
+    useEffect(() => {}); // ❌ En bucle
+  }
+}
+
+// ✅ Haz esto
+function GoodComponent() {
+  const [count, setCount] = useState(0); // ✅ En el nivel superior
+  
+  useEffect(() => {
+    if (someCondition) {
+      // Lógica condicional dentro del hook
+    }
+  });
+}
+            </code></pre>
+
+        <h3>2. Solo llama Hooks desde componentes React</h3>
+        <pre><code class="language-javascript">
+// ❌ No desde funciones normales
+function regularFunction() {
+  const [state, setState] = useState(0); // ❌ Error
+}
+
+// ✅ Desde componentes React
+function MyComponent() {
+  const [state, setState] = useState(0); // ✅ Correcto
+}
+
+// ✅ Desde hooks personalizados
+function useCustomHook() {
+  const [state, setState] = useState(0); // ✅ Correcto
+}
+            </code></pre>
+
+        <h2>Optimización con Hooks</h2>
+
+        <h3>useMemo para Cálculos Costosos</h3>
+        <pre><code class="language-javascript">
+function ExpensiveComponent({ items }) {
+  const expensiveValue = useMemo(() =&gt; {
+    return items.reduce((acc, item) =&gt; acc + item.value, 0);
+  }, [items]); // Solo recalcula si items cambia
+
+  return &lt;div&gt;Total: {expensiveValue}&lt;/div&gt;;
+}
+            </code></pre>
+
+        <h3>useCallback para Funciones</h3>
+        <pre><code class="language-javascript">
+function Parent({ items }) {
+  const [filter, setFilter] = useState('');
+
+  const handleClick = useCallback((id) =&gt; {
+    // Lógica del click
+  }, []); // La función no cambia entre renders
+
+  return (
+    &lt;div&gt;
+      {items.map(item =&gt; (
+        &lt;Child key={item.id} item={item} onClick={handleClick} /&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}
+            </code></pre>
+
+        <h2>Conclusión</h2>
+        <p>
+          Los React Hooks han transformado la forma de escribir componentes
+          React, haciéndolos más simples, reutilizables y fáciles de testear.
+          Con estos conceptos fundamentales, podrás:
+        </p>
+
+        <ul>
+          <li>✅ Manejar estado local con <strong>useState</strong></li>
+          <li>
+            ✅ Ejecutar efectos secundarios con <strong>useEffect</strong>
+          </li>
+          <li>✅ Compartir estado global con <strong>useContext</strong></li>
+          <li>✅ Crear hooks personalizados reutilizables</li>
+          <li>
+            ✅ Optimizar performance con <strong>useMemo</strong> y
+            <strong>useCallback</strong>
+          </li>
+        </ul>
+
+        <p>
+          <strong>Próximos pasos:</strong> Practica creando hooks personalizados
+          para tu lógica específica y explora hooks adicionales como useReducer,
+          useRef y useImperativeHandle.
+        </p>
+
+        <p>¡Los hooks son el futuro de React! 🚀</p>
+      </main>
+    </article>
+  </body>
+</html>

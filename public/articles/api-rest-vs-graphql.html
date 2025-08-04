@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Comparativa detallada entre REST y GraphQL. Analizamos las ventajas, desventajas y casos de uso ideales para cada tecnología con ejemplos reales."
+    />
+    <meta name="keywords" content="API, REST, GraphQL, Backend" />
+    <meta name="author" content="DevTips Bot" />
+    <meta
+      property="og:title"
+      content="API REST vs GraphQL: ¿Cuál Elegir? - DevTips Programming Blog"
+    />
+    <meta
+      property="og:description"
+      content="Comparativa detallada entre REST y GraphQL. Analizamos las ventajas, desventajas y casos de uso ideales para cada tecnología con ejemplos reales."
+    />
+    <meta property="og:type" content="article" />
+    <meta property="article:published_time" content="2024-01-13T09:15:00Z" />
+    <meta property="article:author" content="DevTips Bot" />
+    <meta property="article:section" content="backend" />
+    <meta property="article:tag" content="API, REST, GraphQL, Backend" />
+    <title>API REST vs GraphQL: ¿Cuál Elegir? - DevTips Programming Blog</title>
+    <link
+      rel="canonical"
+      href="https://tu-dominio.com/articulo/api-rest-vs-graphql"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "API REST vs GraphQL: ¿Cuál Elegir?",
+        "description": "Comparativa detallada entre REST y GraphQL. Analizamos las ventajas, desventajas y casos de uso ideales para cada tecnología con ejemplos reales.",
+        "author": {
+          "@type": "Person",
+          "name": "DevTips Bot"
+        },
+        "datePublished": "2024-01-13T09:15:00Z",
+        "dateModified": "2024-01-13T09:15:00Z",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "https://tu-dominio.com/articulo/api-rest-vs-graphql"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "DevTips",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://tu-dominio.com/logo.png"
+          }
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <article>
+      <header>
+        <h1>API REST vs GraphQL: ¿Cuál Elegir?</h1>
+        <div class="article-meta">
+          <span class="author">DevTips Bot</span>
+          <time datetime="2024-01-13T09:15:00Z">13 de enero de 2024</time>
+          <span class="read-time">6 min de lectura</span>
+          <span class="category">backend</span>
+        </div>
+        <div class="tags">
+          <span class="tag">API</span>
+          <span class="tag">REST</span>
+          <span class="tag">GraphQL</span>
+          <span class="tag">Backend</span>
+        </div>
+        <div class="summary">
+          Comparativa detallada entre REST y GraphQL. Analizamos las ventajas,
+          desventajas y casos de uso ideales para cada tecnología con ejemplos
+          reales.
+        </div>
+      </header>
+      <main class="article-content">
+        <h2>Introducción</h2>
+        <p>
+          En el desarrollo de APIs modernas, dos enfoques dominan el panorama:
+          <strong>REST</strong> (Representational State Transfer) y
+          <strong>GraphQL</strong>. Ambos tienen sus fortalezas y debilidades, y
+          elegir el correcto puede determinar el éxito de tu proyecto.
+        </p>
+
+        <h2>¿Qué es REST?</h2>
+        <p>
+          REST es un estilo arquitectónico para diseñar servicios web que
+          utiliza los métodos HTTP estándar (GET, POST, PUT, DELETE) para
+          realizar operaciones sobre recursos identificados por URLs.
+        </p>
+
+        <h3>Características de REST</h3>
+        <ul>
+          <li>
+            <strong>Stateless:</strong> Cada request contiene toda la
+            información necesaria
+          </li>
+          <li>
+            <strong>Cacheable:</strong> Las respuestas pueden ser cacheadas
+          </li>
+          <li>
+            <strong>Client-Server:</strong> Separación clara entre cliente y
+            servidor
+          </li>
+          <li>
+            <strong>Uniform Interface:</strong> Interfaz uniforme para todos los
+            recursos
+          </li>
+        </ul>
+
+        <h3>Ejemplo de API REST</h3>
+        <pre><code class="language-javascript">
+// Obtener todos los usuarios
+GET /api/users
+
+// Obtener un usuario específico
+GET /api/users/123
+
+// Crear un nuevo usuario
+POST /api/users
+{
+  "name": "Juan Pérez",
+  "email": "juan@example.com"
+}
+
+// Actualizar un usuario
+PUT /api/users/123
+{
+  "name": "Juan Carlos Pérez",
+  "email": "juan.carlos@example.com"
+}
+
+// Eliminar un usuario
+DELETE /api/users/123
+            </code></pre>
+
+        <h2>¿Qué es GraphQL?</h2>
+        <p>
+          GraphQL es un lenguaje de consulta y runtime para APIs que permite a
+          los clientes solicitar exactamente los datos que necesitan. Fue
+          desarrollado por Facebook en 2012 y liberado como open source en 2015.
+        </p>
+
+        <h3>Características de GraphQL</h3>
+        <ul>
+          <li>
+            <strong>Single Endpoint:</strong> Una sola URL para todas las
+            operaciones
+          </li>
+          <li><strong>Strongly Typed:</strong> Schema fuertemente tipado</li>
+          <li><strong>Introspection:</strong> El schema es autodocumentado</li>
+          <li>
+            <strong>Real-time:</strong> Soporte nativo para subscripciones
+          </li>
+        </ul>
+
+        <h3>Ejemplo de GraphQL</h3>
+        <pre><code class="language-graphql">
+# Schema Definition
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  posts: [Post!]!
+}
+
+type Post {
+  id: ID!
+  title: String!
+  content: String!
+  author: User!
+}
+
+type Query {
+  users: [User!]!
+  user(id: ID!): User
+  posts: [Post!]!
+}
+            </code></pre>
+
+        <pre><code class="language-javascript">
+// Query para obtener usuarios con sus posts
+query GetUsersWithPosts {
+  users {
+    id
+    name
+    email
+    posts {
+      id
+      title
+    }
+  }
+}
+
+// Query para obtener solo el nombre de un usuario
+query GetUserName($id: ID!) {
+  user(id: $id) {
+    name
+  }
+}
+
+// Mutation para crear un usuario
+mutation CreateUser($input: CreateUserInput!) {
+  createUser(input: $input) {
+    id
+    name
+    email
+  }
+}
+            </code></pre>
+
+        <h2>Comparación Detallada</h2>
+
+        <h3>1. Flexibilidad de Datos</h3>
+
+        <h4>REST</h4>
+        <pre><code class="language-javascript">
+// ❌ Problema: Over-fetching
+// El cliente recibe más datos de los que necesita
+GET /api/users/123
+Response: {
+  "id": 123,
+  "name": "Juan Pérez",
+  "email": "juan@example.com",
+  "address": {...},
+  "preferences": {...},
+  "metadata": {...}
+}
+
+// ❌ Problema: Under-fetching
+// Necesitas múltiples requests
+GET /api/users/123      // Para datos del usuario
+GET /api/users/123/posts // Para los posts del usuario
+            </code></pre>
+
+        <h4>GraphQL</h4>
+        <pre><code class="language-javascript">
+// ✅ Solicitas exactamente lo que necesitas
+query {
+  user(id: 123) {
+    name
+    posts {
+      title
+    }
+  }
+}
+
+// Response: Solo los datos solicitados
+{
+  "data": {
+    "user": {
+      "name": "Juan Pérez",
+      "posts": [
+        { "title": "Mi primer post" },
+        { "title": "GraphQL es genial" }
+      ]
+    }
+  }
+}
+            </code></pre>
+
+        <h3>2. Versionado</h3>
+
+        <h4>REST</h4>
+        <pre><code class="language-javascript">
+// ❌ Necesitas versionar la API
+GET /api/v1/users/123
+GET /api/v2/users/123
+
+// Mantienes múltiples versiones
+app.get('/api/v1/users/:id', handleUserV1);
+app.get('/api/v2/users/:id', handleUserV2);
+            </code></pre>
+
+        <h4>GraphQL</h4>
+        <pre><code class="language-javascript">
+// ✅ Evolución sin versiones
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  # Nuevo campo añadido
+  avatar: String
+  # Campo deprecado
+  username: String @deprecated(reason: "Use name instead")
+}
+            </code></pre>
+
+        <h3>3. Caching</h3>
+
+        <h4>REST</h4>
+        <pre><code class="language-javascript">
+// ✅ Caching HTTP nativo
+GET /api/users/123
+Cache-Control: max-age=3600
+
+// ✅ Fácil implementación con CDN
+// ✅ Browser cache automático
+            </code></pre>
+
+        <h4>GraphQL</h4>
+        <pre><code class="language-javascript">
+// ❌ Caching más complejo
+// Necesitas soluciones específicas como Apollo Cache
+
+// ✅ Pero más granular y eficiente
+const client = new ApolloClient({
+  cache: new InMemoryCache({
+    typePolicies: {
+      User: {
+        fields: {
+          posts: {
+            merge(existing, incoming) {
+              return [...existing, ...incoming];
+            }
+          }
+        }
+      }
+    }
+  })
+});
+            </code></pre>
+
+        <h3>4. Complejidad de Implementación</h3>
+
+        <h4>REST</h4>
+        <pre><code class="language-javascript">
+// ✅ Simple de implementar
+app.get('/api/users', (req, res) => {
+  const users = getUsersFromDB();
+  res.json(users);
+});
+
+app.get('/api/users/:id', (req, res) => {
+  const user = getUserById(req.params.id);
+  res.json(user);
+});
+            </code></pre>
+
+        <h4>GraphQL</h4>
+        <pre><code class="language-javascript">
+// ❌ Curva de aprendizaje más pronunciada
+const typeDefs = gql`
+  type User {
+    id: ID!
+    name: String!
+    posts: [Post!]!
+  }
+  
+  type Query {
+    users: [User!]!
+    user(id: ID!): User
+  }
+`;
+
+const resolvers = {
+  Query: {
+    users: () => getUsersFromDB(),
+    user: (_, { id }) => getUserById(id)
+  },
+  User: {
+    posts: (user) => getPostsByUserId(user.id)
+  }
+};
+            </code></pre>
+
+        <h2>Cuándo Usar REST</h2>
+
+        <h3>✅ REST es ideal para:</h3>
+        <ul>
+          <li><strong>APIs simples</strong> con operaciones CRUD básicas</li>
+          <li>
+            <strong>Equipos pequeños</strong> que necesitan desarrollo rápido
+          </li>
+          <li><strong>Aplicaciones con caching intensivo</strong></li>
+          <li>
+            <strong>APIs públicas</strong> que necesitan ser fáciles de usar
+          </li>
+          <li>
+            <strong>Microservicios</strong> con responsabilidades bien definidas
+          </li>
+          <li><strong>Sistemas legacy</strong> que ya usan REST</li>
+        </ul>
+
+        <h3>Casos de uso típicos</h3>
+        <pre><code class="language-javascript">
+// Blog simple
+GET /api/posts          // Lista de posts
+GET /api/posts/123      // Post específico
+POST /api/posts         // Crear post
+PUT /api/posts/123      // Actualizar post
+DELETE /api/posts/123   // Eliminar post
+
+// E-commerce básico
+GET /api/products       // Catálogo de productos
+GET /api/orders         // Órdenes del usuario
+POST /api/orders        // Crear nueva orden
+            </code></pre>
+
+        <h2>Cuándo Usar GraphQL</h2>
+
+        <h3>✅ GraphQL es ideal para:</h3>
+        <ul>
+          <li>
+            <strong>Aplicaciones complejas</strong> con múltiples tipos de
+            clientes
+          </li>
+          <li>
+            <strong>Equipos grandes</strong> con frontend y backend separados
+          </li>
+          <li><strong>APIs con muchas relaciones</strong> entre entidades</li>
+          <li>
+            <strong>Aplicaciones móviles</strong> donde el ancho de banda
+            importa
+          </li>
+          <li><strong>Rapid prototyping</strong> y desarrollo ágil</li>
+          <li><strong>Real-time features</strong> con subscripciones</li>
+        </ul>
+
+        <h3>Casos de uso típicos</h3>
+        <pre><code class="language-javascript">
+// Red social compleja
+query GetFeed {
+  user(id: "me") {
+    name
+    avatar
+    feed {
+      posts {
+        id
+        content
+        author {
+          name
+          avatar
+        }
+        comments {
+          content
+          author {
+            name
+          }
+        }
+        likes {
+          count
+        }
+      }
+    }
+  }
+}
+
+// Dashboard analítico
+query GetDashboard {
+  analytics {
+    users {
+      total
+      active
+      growth
+    }
+    revenue {
+      total
+      monthly
+      trends
+    }
+    performance {
+      responseTime
+      uptime
+    }
+  }
+}
+            </code></pre>
+
+        <h2>Tabla de Decisión</h2>
+
+        <table border="1" style="width: 100%; border-collapse: collapse">
+          <tr>
+            <th>Criterio</th>
+            <th>REST</th>
+            <th>GraphQL</th>
+          </tr>
+          <tr>
+            <td><strong>Curva de aprendizaje</strong></td>
+            <td>✅ Baja</td>
+            <td>❌ Alta</td>
+          </tr>
+          <tr>
+            <td><strong>Caching</strong></td>
+            <td>✅ Nativo HTTP</td>
+            <td>❌ Requiere implementación</td>
+          </tr>
+          <tr>
+            <td><strong>Flexibilidad de datos</strong></td>
+            <td>❌ Fija</td>
+            <td>✅ Muy flexible</td>
+          </tr>
+          <tr>
+            <td><strong>Performance (ancho de banda)</strong></td>
+            <td>❌ Over/under-fetching</td>
+            <td>✅ Datos exactos</td>
+          </tr>
+          <tr>
+            <td><strong>Tooling</strong></td>
+            <td>✅ Maduro</td>
+            <td>✅ Excelente</td>
+          </tr>
+          <tr>
+            <td><strong>Ecosistema</strong></td>
+            <td>✅ Muy maduro</td>
+            <td>🟡 En crecimiento</td>
+          </tr>
+        </table>
+
+        <h2>Híbridos y Alternativas</h2>
+
+        <h3>¿Por qué no ambos?</h3>
+        <pre><code class="language-javascript">
+// Puedes usar REST y GraphQL juntos
+app.use('/api/rest', restRoutes);        // REST para operaciones simples
+app.use('/api/graphql', graphqlMiddleware); // GraphQL para queries complejas
+
+// O usar herramientas como PostGraphile
+// que generan GraphQL automáticamente desde tu base de datos
+            </code></pre>
+
+        <h3>Otras alternativas</h3>
+        <ul>
+          <li><strong>tRPC:</strong> Type-safe APIs para TypeScript</li>
+          <li><strong>gRPC:</strong> Para comunicación de alta performance</li>
+          <li>
+            <strong>JSON:API:</strong> Estándar para APIs REST más eficientes
+          </li>
+        </ul>
+
+        <h2>Conclusión</h2>
+
+        <p>
+          <strong>No hay una respuesta única.</strong> La elección entre REST y
+          GraphQL depende de:
+        </p>
+
+        <ul>
+          <li>🎯 <strong>Complejidad del proyecto</strong></li>
+          <li>👥 <strong>Tamaño y experiencia del equipo</strong></li>
+          <li>📱 <strong>Tipos de clientes (web, móvil, IoT)</strong></li>
+          <li>⚡ <strong>Requisitos de performance</strong></li>
+          <li>🔄 <strong>Frecuencia de cambios en la API</strong></li>
+        </ul>
+
+        <h3>Recomendación final:</h3>
+        <ul>
+          <li>✅ <strong>Empezar con REST</strong> si eres nuevo en APIs</li>
+          <li>
+            ✅ <strong>Migrar a GraphQL</strong> cuando la complejidad lo
+            justifique
+          </li>
+          <li>
+            ✅ <strong>Evaluar el contexto</strong> específico de tu proyecto
+          </li>
+          <li>
+            ✅ <strong>Considerar soluciones híbridas</strong> cuando sea
+            apropiado
+          </li>
+        </ul>
+
+        <p>
+          Recuerda:
+          <em
+            >La mejor tecnología es la que resuelve tu problema específico de
+            manera más eficiente.</em
+          >
+          🚀
+        </p>
+      </main>
+    </article>
+  </body>
+</html>
