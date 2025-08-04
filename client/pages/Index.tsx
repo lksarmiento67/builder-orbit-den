@@ -210,56 +210,33 @@ export default function Index() {
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex flex-col space-y-2">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl flex items-center justify-center">
-                  <Code2 className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">DevTips</h1>
-                  <p className="text-xs text-gray-600">Tips de Programación</p>
-                </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl flex items-center justify-center">
+                <Code2 className="w-6 h-6 text-white" />
               </div>
-              <div className="relative hidden sm:block">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Buscar tips..."
-                  className="pl-10 w-64"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">DevTips</h1>
+                <p className="text-xs text-gray-600">Tips de Programación</p>
               </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <NavigationMenu>
-                <NavigationMenuLinks />
-              </NavigationMenu>
             </div>
           </div>
-          <nav className="flex justify-center space-x-6 mt-4 border-t border-gray-200 pt-4">
-            <Link
-              to="/"
-              className="text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              Inicio
-            </Link>
-            <Link
-              to="/contact"
-              className="text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              Contacto
-            </Link>
-            <Link
-              to="/code-playground"
-              className="text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              Espacio de Código
-            </Link>
-          </nav>
         </div>
       </header>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search */}
+        <div className="mb-6">
+          <div className="relative max-w-2xl mx-auto">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Buscar tips..."
+              className="pl-10 w-full"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
         {/* Categories Filter */}
         <div className="mb-8">
           <div className="flex flex-wrap gap-2">
@@ -284,19 +261,6 @@ export default function Index() {
                 </Button>
               );
             })}
-          </div>
-        </div>
-
-        {/* Mobile Search */}
-        <div className="mb-6 sm:hidden">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Buscar tips..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
           </div>
         </div>
 
@@ -470,6 +434,36 @@ export default function Index() {
           </div>
         )}
       </div>
+      
+      {/* Footer */}
+      <footer className="bg-gray-50 border-t border-gray-200 mt-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center space-x-3 mb-4 md:mb-0">
+              <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg flex items-center justify-center">
+                <Code2 className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-gray-900 font-semibold">DevTips</span>
+            </div>
+            
+            <nav className="flex flex-wrap justify-center gap-6">
+              <Link to="/" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                Inicio
+              </Link>
+              <Link to="/contacto" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                Contacto
+              </Link>
+              <Link to="/espacio-codigo" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                Espacio de Código
+              </Link>
+            </nav>
+            
+            <div className="mt-4 md:mt-0 text-sm text-gray-500">
+              © {new Date().getFullYear()} DevTips. Todos los derechos reservados.
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

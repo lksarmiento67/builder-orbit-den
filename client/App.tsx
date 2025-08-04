@@ -27,7 +27,7 @@ const App = () => (
           <Route path="/categoria/:category" element={<Placeholder title="Categoría" description="Artículos de esta categoría" />} />
           <Route path="/sobre-nosotros" element={<Placeholder title="Sobre Nosotros" description="Conoce más sobre nuestro blog de programación" />} />
           <Route path="/contacto" element={<Contact />} />
-          <Route path="/code-playground" element={<CodePlayground />} />
+          <Route path="/espacio-codigo" element={<CodePlayground />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
