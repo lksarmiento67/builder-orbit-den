@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ArticleSummary } from "@shared/types";
+import { NavigationMenu, NavigationMenuLinks } from "@/components/ui/navigation-menu";
 
 // Mock data - esto será reemplazado por data real de los archivos generados
 const mockArticles: ArticleSummary[] = [
@@ -209,16 +210,16 @@ export default function Index() {
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl flex items-center justify-center">
-                <Code2 className="w-6 h-6 text-white" />
+            <div className="flex flex-col space-y-2">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl flex items-center justify-center">
+                  <Code2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">DevTips</h1>
+                  <p className="text-xs text-gray-600">Tips de Programación</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">DevTips</h1>
-                <p className="text-xs text-gray-600">Tips de Programación</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
               <div className="relative hidden sm:block">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
@@ -229,7 +230,32 @@ export default function Index() {
                 />
               </div>
             </div>
+            <div className="flex items-center space-x-4">
+              <NavigationMenu>
+                <NavigationMenuLinks />
+              </NavigationMenu>
+            </div>
           </div>
+          <nav className="flex justify-center space-x-6 mt-4 border-t border-gray-200 pt-4">
+            <Link
+              to="/"
+              className="text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              Inicio
+            </Link>
+            <Link
+              to="/contact"
+              className="text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              Contacto
+            </Link>
+            <Link
+              to="/code-playground"
+              className="text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              Espacio de Código
+            </Link>
+          </nav>
         </div>
       </header>
 

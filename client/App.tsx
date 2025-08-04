@@ -10,6 +10,8 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Placeholder from "./pages/Placeholder";
 import ArticleDetail from "./pages/ArticleDetail";
+import Contact from "./pages/Contact";
+import CodePlayground from "./pages/CodePlayground";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +26,8 @@ const App = () => (
           <Route path="/articulo/:slug" element={<ArticleDetail />} />
           <Route path="/categoria/:category" element={<Placeholder title="Categoría" description="Artículos de esta categoría" />} />
           <Route path="/sobre-nosotros" element={<Placeholder title="Sobre Nosotros" description="Conoce más sobre nuestro blog de programación" />} />
-          <Route path="/contacto" element={<Placeholder title="Contacto" description="Ponte en contacto con nosotros" />} />
+          <Route path="/contacto" element={<Contact />} />
+          <Route path="/code-playground" element={<CodePlayground />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
